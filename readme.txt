@@ -1,6 +1,18 @@
 To use:
 mine = Minesweeper(rows, columns, mines, gui=False)
-Example: mine = Minesweeper(16, 30, 99, gui=False)
+gui will launch the GUI upon initialization.
+
+You can also create games based on difficulty:
+mine = Minesweeper.difficulty('hard')
+
+Or load a game from a saved game.
+mine = Minesweeper.load_state('saved_game.json')
+
+To save a game:
+mine.save_state('saved_game.json')
+To save the beginning configuration:
+mine.save_state('saved_game.json', initial=True)
+
 To reveal squares, any number you'd like:
 lose, exposed_field, newly_exposed = mine.reveal_wrapper([(list of coordinate tuples)])
 Example: mine.reveal_wrapper([(1, 2), (5, 16)])
@@ -42,11 +54,10 @@ But then you'd suck. It's kind of hard to hide data in python.
 
 MineServant contains several functions that will probably be helpful for you.
 Here are some must-use functions:
-(coordinate) = MineServant.get_random_blank_block()
+(row, column) = MineServant.get_random_blank_block()
 Returns a random block with value 0. This is a good starting point for every game. It's not
 guaranteed you'll get a good reveal.
 
-
-(coordinate tuple) = MineServant.get_fifty_fifty_mine([(two coordinate tuples)])
+((x1, y1), (x2, y2)) = MineServant.get_fifty_fifty_mine([(two coordinate tuples)])
 If you've whittled down the field to two adjacent blocks with a 50/50 chance of having a mine, this
 function just gives you the mine. You worked hard. You earned that mine!
