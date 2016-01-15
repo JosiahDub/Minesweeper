@@ -1,0 +1,93 @@
+*****GENERAL FLOW*****
+Perform the flag/reveal process repeatedly
+    If no more hits, move on to confined mine
+Perform confined mine until a single hit
+    If hit, move back to flag/reveal
+
+
+*****FLAG/REVEAL PROCESS*****
+This is the easiest process. Run this until unchecked have all been confirmed
+pass in one coordinate
+number of flags equals block value
+	reveal unrevealed
+	remove from unchecked list
+some flags, some unrevealed
+	flags+unrevealed = value?
+		reveal unrevealed
+		remove from unchecked list
+no flags
+	num unrevealed = value?
+		flag unrevealed
+		remove from unchecked list
+
+
+*****CONFINED MINE PROCESS*****
+used when you know a mine is in a specific area and other blocks touch this area
+mines_in_area = block_value - neighboring_flags
+given unrevealed blocks
+find surrounding revealed neighbors
+compare against each other and find similar neighbors
+    given n blocks, compare 1 to 2, then the result to 3, ... then the result to n
+block_value == neighbor_flags + mines_in_area + blocks_outside_area
+    flag blocks_outside_area
+    f200
+    f422
+    fXXx
+    mine has to be in XX, so x can be flagged
+block_value == mines_in_area + neighboring_flags
+    reveal blocks_outside_area
+    f200
+    f411
+    fXXx
+    mine has to be in XX, so x can be revealed
+
+*****SHARED CONFINED MINE PROCESS*****
+0000
+f311
+xXXx
+Since there can only be one mine in the XX area, the 4th x can be revealed. And the 1st x can be flagged
+This isn't caught in the confined mine process.
+
+x100
+f411
+xXXx
+
+xxxx
+f110
+3310
+bb10
+
+13x
+01x
+02x
+01x
+02x
+(From second row 1 and below 2's perspective)
+shared_area = 2
+outside_shared_area = 1
+possible_area_mines = 1 min(real_value, shared_area)
+neighbors_outside_shared_area = 1
+if neighbors_real_value = neighbors_outside_shared_area + possible_area_mines
+    flag
+    This confirms that the number of mines in the shared area is right, so we can do an additional
+    check with the original block
+    if real_value == possible_area_mines
+        reveal outside_shared_area
+
+        10, 9
+
+Check two touching neighbor values. Look at their shared area.
+mines_in_shared_area = |(n1 - f1) - (n2 - f2)|
+
+If mines_in_shared_area > 0, Check the area outside of their area.
+
+
+    Check the unrevealed area's pair of neighbors. Calculate lowest number of
+mines in that area. Then expand outward, checking the unrevealed area for
+each neighbor. Maybe call concealed_mine process recursively?!?!
+
+*****TWO CONFINED MINES*****
+fXXx
+f32X
+111X
+There is one mine in each set of XX so the x can be revealed.

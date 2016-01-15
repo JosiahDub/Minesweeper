@@ -110,8 +110,7 @@ class Minesweeper:
         mine = cls(rows, columns, mines)
         return mine
 
-    # TODO: Combine these two
-    def save_field_state(self, save_name):
+    def save_field_state(self, save_name, initial=False):
         """
         Saves the current configuration as a JSON file.
         :return:
@@ -119,21 +118,12 @@ class Minesweeper:
         minefield = {'rows': self.rows, 'columns': self.columns, 'mines': self.mines,
                      'neighbors': self.neighbors, 'mine_coords': self.mine_coordinates,
                      'flags': self.flags, 'exposed': self.exposed_field}
+        if initial:
+            minefield['flags'] = []
+            minefield['exposed'] = []
         file_name = save_name + '.json'
         with open(file_name, 'w') as out_file:
             json.dump(minefield, out_file, separators=(',', ':'))
-
-    def save_initial_state(self, save_name):
-        """
-        Saves the initial conditions as a JSON file.
-        :return:
-        """
-        minefield = {'rows': self.rows, 'columns': self.columns, 'mines': self.mines,
-                     'neighbors': self.neighbors, 'mine_coords': self.mine_coordinates,
-                     'flags': [], 'exposed': []}
-        file_name = save_name + '.json'
-        with open(file_name, 'w') as out_file:
-            json.dump(minefield, out_file)
 
     @classmethod
     def load_state(cls, state, gui=False):
