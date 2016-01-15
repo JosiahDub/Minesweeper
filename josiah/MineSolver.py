@@ -91,7 +91,19 @@ class MineSolver:
                 self.remove_checked_blocks()
         print "out of moves."
         print "full field"
+        # Quasi pretty-prints the field for the console.
+        print_field = []
         for row in self.full_field:
+            new_row = ''
+            for block in row:
+                if block == -1:
+                    new_row += '-1'
+                elif 0 <= block <= 8:
+                    new_row += ' ' + str(block)
+                elif block == 'f':
+                    new_row += ' ' + block
+            print_field.append(new_row)
+        for row in print_field:
             print row
         # print 'neighbors'
         # for row in self.mine.neighbors:
@@ -104,7 +116,6 @@ class MineSolver:
 
         :return:
         """
-        print 'removing checked blocks'
         for block in self.blocks_to_remove:
             self.unchecked_blocks.remove(block)
         self.blocks_to_remove.clear()
