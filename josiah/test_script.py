@@ -1,5 +1,5 @@
 __author__ = 'josiah'
-from MineSolver import MineSolver
+from josiah.MineSolver import MineSolver
 
 mine = MineSolver()
 blank_block = mine.servant.get_random_blank_block()
