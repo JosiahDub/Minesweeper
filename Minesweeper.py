@@ -47,6 +47,8 @@ class Minesweeper:
         # GUI
         self.master = Tk()
         self.master.title('Minesweeper!')
+        self.gui_colors = {'flag': 'green', 'bomb': 'red',
+                           'unrevealed': 'light gray', 'revealed': 'dark gray'}
 
         # set up buttons
         # Dictionary: [button location tuple] = button handle
@@ -55,7 +57,7 @@ class Minesweeper:
         for row in range(0, self.rows):
             for column in range(0, self.columns):
                 button_handle = Button(self.master, width=1,
-                                       background='light gray')
+                                       background=self.gui_colors['unrevealed'])
                 # Left click handler (reveal square)
                 button_handle.bind('<ButtonRelease-1>',
                                    lambda event, button_tuple=(row, column):
@@ -70,18 +72,9 @@ class Minesweeper:
                                    self.button_flag(event, button_tuple))
                 button_handle.grid(row=(row + 1), column=column)
                 self.button_fields[(row, column)] = button_handle
-        # hide_button = Button(self.master, width=3, text='Hide', command=lambda: self.hide_gui())
-        # hide_button.grid(columnspan=2, row=0, column=0, pady=5)
 
         if self.gui:
             self.master.mainloop()
-
-    # def hide_gui(self):
-    #     """
-    #
-    #     :return:
-    #     """
-    #     self.master.withdraw()
 
     @classmethod
     def difficulty(cls, difficulty):
@@ -162,7 +155,7 @@ class Minesweeper:
         for coord in mine.flags:
             button_handle = mine.button_fields[coord]
             button_handle.configure(text='f')
-            button_handle.configure(background='green')
+            button_handle.configure(background=mine.gui_colors['flag'])
         # Runs the GUI if desired
         if gui:
             mine.master.mainloop()
@@ -233,11 +226,11 @@ class Minesweeper:
         if button_tuple in self.flags:
             self.flags.remove(button_tuple)
             button_handle.configure(text='')
-            button_handle.configure(background='light gray')
+            button_handle.configure(background=self.gui_colors['unrevealed'])
         else:
             self.flags.append(button_tuple)
             button_handle.configure(text='f')
-            button_handle.configure(background='green')
+            button_handle.configure(background=self.gui_colors['flag'])
         return self.for_the_win(), self.get_exposed_field()
 
     def get_num_flag_neighbors(self, coordinate):
@@ -420,9 +413,9 @@ class Minesweeper:
                     index_tuple = tuple(coordinate)
                     button_handle = self.button_fields[index_tuple]
                     button_handle.configure(text=button_text)
-                    button_handle.configure(background='dark gray')
+                    button_handle.configure(background=self.gui_colors['revealed'])
                     if button_text == 'b':
-                        button_handle.configure(background='red')
+                        button_handle.configure(background=self.gui_colors['bomb'])
         return lose
 
 

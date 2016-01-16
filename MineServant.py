@@ -10,6 +10,8 @@ class MineServant:
     def __init__(self, mine):
         self.mine = mine
         self.full_field = mine.get_exposed_field()
+        self.color_coding = {'flag': 'green', 'bomb': 'red', 'unrevealed': 'yellow',
+                             'zero': 'grey', 'number': 'white'}
 
     def get_unrevealed_blocks(self, coordinate):
         """
@@ -110,16 +112,19 @@ class MineServant:
             for block in row:
                 # Unrevealed: yellow
                 if block == -1:
-                    new_row += colored('-1', 'yellow')
-                # Revealed: white
-                elif 0 <= block <= 8:
-                    new_row += colored(' ' + str(block), 'white')
+                    new_row += colored('-1', self.color_coding['unrevealed'])
+                # Revealed: zero
+                elif block == 0:
+                    new_row += colored(' ' + str(block), self.color_coding['zero'])
+                # Revealed: greater than zero
+                elif 1 <= block <= 8:
+                    new_row += colored(' ' + str(block), self.color_coding['number'])
                 # Flagged: green
                 elif block == 'f':
-                    new_row += colored(' ' + block, 'green')
+                    new_row += colored(' ' + block, self.color_coding['flag'])
                 # Bomb: red
                 elif block == 'b':
-                    new_row += colored(' ' + block, 'red')
+                    new_row += colored(' ' + block, self.color_coding['bomb'])
             print_field.append(new_row)
         for row in print_field:
             print row
