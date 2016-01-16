@@ -29,8 +29,8 @@ class MineSolver:
         self.win = False
 
     def reveal_squares(self, coordinate):
-        """ Calls the Minesweeper button_reveal function so progress can be tracked with the GUI.
-
+        """
+        Calls the Minesweeper button_reveal function so progress can be tracked with the GUI.
         :param coordinate:
         :return:
         """
@@ -40,8 +40,8 @@ class MineSolver:
             self.unchecked_blocks.extend(self.newly_exposed)
 
     def solver(self):
-        """ Process that loops through unchecked blocks and runs the flag/reveal process.
-
+        """
+        Process that loops through unchecked blocks and runs the flag/reveal process.
         :return:
         """
         repeat = True
@@ -92,19 +92,7 @@ class MineSolver:
         print "out of moves."
         print "full field"
         # Quasi pretty-prints the field for the console.
-        print_field = []
-        for row in self.full_field:
-            new_row = ''
-            for block in row:
-                if block == -1:
-                    new_row += '-1'
-                elif 0 <= block <= 8:
-                    new_row += ' ' + str(block)
-                elif block == 'f':
-                    new_row += ' ' + block
-            print_field.append(new_row)
-        for row in print_field:
-            print row
+        self.servant.pretty_print_field()
         # print 'neighbors'
         # for row in self.mine.neighbors:
         #     print row
@@ -112,8 +100,8 @@ class MineSolver:
             print "You won, because you're the best maybe."
 
     def remove_checked_blocks(self):
-        """ Removes self.blocks_to_remove from self.unchecked_blocks.
-
+        """
+        Removes self.blocks_to_remove from self.unchecked_blocks.
         :return:
         """
         for block in self.blocks_to_remove:
@@ -123,7 +111,6 @@ class MineSolver:
     def flag_reveal_process(self, coordinate):
         """
         Main process in which unrevealed blocks are found to reveal or flag.
-
         :param coordinate:
         :return:
         """
@@ -151,7 +138,6 @@ class MineSolver:
         """
         Check if a mine is enclosed in an area, and if surrounding blocks can be flagged or
         revealed.
-
         :param coordinate:
         :return:
         """
@@ -186,8 +172,8 @@ class MineSolver:
         return reveal, flag
 
     def shared_mine_process(self, coordinate):
-        """ Check if two neighbors share mines.
-
+        """
+        Check if two neighbors share mines.
         :return:
         """
         flag = False

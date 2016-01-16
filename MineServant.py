@@ -93,3 +93,33 @@ class MineServant:
         indices = set([(row, column) for row in range(0, self.mine.rows)
                       for column in range(0, self.mine.columns)])
         return indices.difference(self.mine.exposed_field, self.mine.flags)
+
+    def pretty_print_field(self):
+        """
+        Prints the field using color coding so you don't have to open the GUI.
+        :return:
+        """
+        try:
+            from termcolor import colored
+        except ImportError:
+            print "Install the termcolor module to use this method."
+            return
+        print_field = []
+        for row in self.full_field:
+            new_row = colored('', 'white')
+            for block in row:
+                # Unrevealed: yellow
+                if block == -1:
+                    new_row += colored('-1', 'yellow')
+                # Revealed: white
+                elif 0 <= block <= 8:
+                    new_row += colored(' ' + str(block), 'white')
+                # Flagged: green
+                elif block == 'f':
+                    new_row += colored(' ' + block, 'green')
+                # Bomb: red
+                elif block == 'b':
+                    new_row += colored(' ' + block, 'red')
+            print_field.append(new_row)
+        for row in print_field:
+            print row
