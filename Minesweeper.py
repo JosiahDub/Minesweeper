@@ -161,6 +161,24 @@ class Minesweeper:
             mine.master.mainloop()
         return mine
 
+    def reset(self):
+        """
+        Returns the game to the beginning conditions.
+        :return:
+        """
+        # Loops through all exposed and flagged blocks
+        for coord in self.exposed_field + self.flags:
+            button_handle = self.button_fields[coord]
+            button_handle.configure(text='f')
+            button_handle.configure(background=self.gui_colors['unrevealed'])
+        # Resets coordinate lists
+        self.flags = []
+        self.exposed_field = []
+        self.newly_exposed = []
+        self.field = [[-1 for row in range(0, self.columns)]
+                      for column in range(0, self.rows)]
+        return self.field
+
     def get_zero_neighbors(self):
         """
         Returns all blocks with zero mines neighboring it.

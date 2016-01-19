@@ -13,6 +13,13 @@ class MineServant:
         self.color_coding = {'flag': 'green', 'bomb': 'red', 'unrevealed': 'yellow',
                              'zero': 'grey', 'number': 'white'}
 
+    def reset(self):
+        """
+        Calls the Minesweeper reset function and updates itself
+        :return:
+        """
+        self.full_field = self.mine.reset()
+
     def get_unrevealed_blocks(self, coordinate):
         """
         Returns the coordinates for all unrevealed blocks around a coordinate.

@@ -8,12 +8,15 @@ from MineServant import MineServant
 
 class MineSolver:
 
-    def __init__(self):
+    def __init__(self, load_game=None):
         self.rows = 16
         self.columns = 30
         self.num_mines = 99
-        self.mine = Minesweeper(self.rows, self.columns, self.num_mines,
-                                gui=False)
+        if load_game is not None:
+            self.mine = Minesweeper(self.rows, self.columns, self.num_mines,
+                                    gui=False)
+        else:
+            self.mine = Minesweeper.load_state(load_game)
         self.servant = MineServant(self.mine)
         self.full_field = self.mine.get_exposed_field()
         self.exposed_indices = self.mine.exposed_field
@@ -93,9 +96,6 @@ class MineSolver:
         print "full field"
         # Quasi pretty-prints the field for the console.
         self.servant.pretty_print_field()
-        # print 'neighbors'
-        # for row in self.mine.neighbors:
-        #     print row
         if self.win:
             print "You won, because you're the best maybe."
 
