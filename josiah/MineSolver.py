@@ -12,7 +12,7 @@ class MineSolver:
         self.rows = 16
         self.columns = 30
         self.num_mines = 99
-        if load_game is not None:
+        if load_game is None:
             self.mine = Minesweeper(self.rows, self.columns, self.num_mines,
                                     gui=False)
         else:
@@ -47,27 +47,34 @@ class MineSolver:
         Process that loops through unchecked blocks and runs the flag/reveal process.
         :return:
         """
-        repeat = True
-        while repeat:
-            repeat = False
-            reveal = True
-            flag = True
+        # Will break out if no moves found
+        solver_repeat = True
+        while solver_repeat:
+            solver_repeat = False
+            flag_reveal_repeat = True
             # Do the easy stuff first
-            while flag or reveal:
+            while flag_reveal_repeat:
+                # Will break out if no flag or reveal
+                flag_reveal_repeat = False
                 for coordinate in self.unchecked_blocks:
+                    # Check if are any unrevealed blocks
                     unrevealed = self.servant.get_unrevealed_blocks(coordinate)
                     if unrevealed:
                         reveal, flag = self.flag_reveal_process(coordinate)
+                        # If it hits even once, repeat flag/reveal
+                        if reveal or flag:
+                            flag_reveal_repeat = True
                         if self.lose:
                             print "Somehow we lost?! It's your fault."
                             return
+                    # If not, schedule block for deletion after for loop.
                     else:
-                        # Schedule block for deletion after for loop.
                         self.blocks_to_remove.add(coordinate)
+                # Remove blocks before moving on
                 if self.blocks_to_remove:
                     self.remove_checked_blocks()
                 if self.win:
-                    repeat = False
+                    solver_repeat = False
                     break
             # Now try the hard stuff
             for coordinate in self.unchecked_blocks:
@@ -75,25 +82,27 @@ class MineSolver:
                 if unrevealed:
                     area_reveal, area_flag = self.confined_mine_process(coordinate, unrevealed)
                     if self.lose:
-                        print 'somehow we lost...'
+                        print "Somehow we lost?! It's your fault."
                         return
                     # Break out of hard stuff and go to flag/reveal
                     if area_reveal or area_flag:
-                        repeat = True
+                        solver_repeat = True
                         break
                     # Check for a shared mine
                     else:
                         shared_reveal, shared_flag = self.shared_mine_process(coordinate)
+                        if self.lose:
+                            print "Somehow we lost?! It's your fault."
+                            return
                         if shared_reveal or shared_flag:
-                            repeat = True
+                            solver_repeat = True
                             break
                 # Schedule block for deletion after for loop.
                 else:
                     self.blocks_to_remove.add(coordinate)
             if self.blocks_to_remove:
                 self.remove_checked_blocks()
-        print "out of moves."
-        print "full field"
+        print "Out of moves. Full field:"
         # Quasi pretty-prints the field for the console.
         self.servant.pretty_print_field()
         if self.win:
