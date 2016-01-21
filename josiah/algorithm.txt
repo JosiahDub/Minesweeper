@@ -1,3 +1,10 @@
+****PERCENTAGES*****
+xxxxx
+x111x
+x101x
+x212x
+xxxxx
+
 *****GENERAL FLOW*****
 Perform the flag/reveal process repeatedly
     If no more hits, move on to confined mine
