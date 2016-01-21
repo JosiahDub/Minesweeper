@@ -50,32 +50,7 @@ class MineSolver:
         # Will break out if no moves found
         solver_repeat = True
         while solver_repeat:
-            solver_repeat = False
-            flag_reveal_repeat = True
-            # Do the easy stuff first
-            while flag_reveal_repeat:
-                # Will break out if no flag or reveal
-                flag_reveal_repeat = False
-                for coordinate in self.unchecked_blocks:
-                    # Check if are any unrevealed blocks
-                    unrevealed = self.servant.get_unrevealed_blocks(coordinate)
-                    if unrevealed:
-                        reveal, flag = self.flag_reveal_process(coordinate)
-                        # If it hits even once, repeat flag/reveal
-                        if reveal or flag:
-                            flag_reveal_repeat = True
-                        if self.lose:
-                            print "Somehow we lost?! It's your fault."
-                            return
-                    # If not, schedule block for deletion after for loop.
-                    else:
-                        self.blocks_to_remove.add(coordinate)
-                # Remove blocks before moving on
-                if self.blocks_to_remove:
-                    self.remove_checked_blocks()
-                if self.win:
-                    solver_repeat = False
-                    break
+            solver_repeat = self.flag_reveal_loop()
             # Now try the hard stuff
             for coordinate in self.unchecked_blocks:
                 unrevealed = self.servant.get_unrevealed_blocks(coordinate)
@@ -89,14 +64,13 @@ class MineSolver:
                         solver_repeat = True
                         break
                     # Check for a shared mine
-                    else:
-                        shared_reveal, shared_flag = self.shared_mine_process(coordinate)
-                        if self.lose:
-                            print "Somehow we lost?! It's your fault."
-                            return
-                        if shared_reveal or shared_flag:
-                            solver_repeat = True
-                            break
+                    shared_reveal, shared_flag = self.shared_mine_process(coordinate)
+                    if self.lose:
+                        print "Somehow we lost?! It's your fault."
+                        return
+                    if shared_reveal or shared_flag:
+                        solver_repeat = True
+                        break
                 # Schedule block for deletion after for loop.
                 else:
                     self.blocks_to_remove.add(coordinate)
@@ -116,6 +90,39 @@ class MineSolver:
         for block in self.blocks_to_remove:
             self.unchecked_blocks.remove(block)
         self.blocks_to_remove.clear()
+
+    def flag_reveal_loop(self):
+        """
+        A loop to call flag_reveal_process in an efficient manner.
+        :return:
+        """
+        solver_repeat = False
+        flag_reveal_repeat = True
+        # Do the easy stuff first
+        while flag_reveal_repeat:
+            # Will break out if no flag or reveal
+            flag_reveal_repeat = False
+            for coordinate in self.unchecked_blocks:
+                # Check if are any unrevealed blocks
+                unrevealed = self.servant.get_unrevealed_blocks(coordinate)
+                if unrevealed:
+                    reveal, flag = self.flag_reveal_process(coordinate)
+                    # If it hits even once, repeat flag/reveal
+                    if reveal or flag:
+                        flag_reveal_repeat = True
+                    if self.lose:
+                        print "Somehow we lost?! It's your fault."
+                        return
+                # If not, schedule block for deletion after for loop.
+                else:
+                    self.blocks_to_remove.add(coordinate)
+            # Remove blocks before moving on
+            if self.blocks_to_remove:
+                self.remove_checked_blocks()
+            if self.win:
+                solver_repeat = False
+                break
+        return solver_repeat
 
     def flag_reveal_process(self, coordinate):
         """
@@ -182,7 +189,7 @@ class MineSolver:
 
     def shared_mine_process(self, coordinate):
         """
-        Check if two neighbors share mines.
+        Loop through all neighbors and check if they share mines.
         :return:
         """
         flag = False
@@ -205,12 +212,14 @@ class MineSolver:
             neighbors_outside_area = len(neighbor_unrevealed) - num_shared
             if neighbors_outside_area > 0 and \
                     neighbor_real_block_value == neighbors_outside_area + possible_area_mines:
+                # Flag neighbor blocks not shared with coordinate
                 for block in neighbor_unrevealed.difference(blocks_unrevealed):
                     self.win, self.full_field = self.mine.button_flag(None, block)
                     self.flags_planted += 1
                 flag = True
                 # Check if the original block can reveal things.
                 if real_block_value == possible_area_mines:
+                    # Reveal blocks not shared with neighbor
                     self.reveal_squares(blocks_unrevealed.difference(neighbor_unrevealed))
                     reveal = True
         return reveal, flag
