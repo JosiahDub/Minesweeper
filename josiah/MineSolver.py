@@ -42,7 +42,7 @@ class MineSolver:
                 self.newly_exposed = self.mine.button_reveal(None, coord)
             self.unchecked_blocks.extend(self.newly_exposed)
 
-    def solver(self):
+    def logical_solver(self):
         """
         Process that loops through unchecked blocks and runs the flag/reveal process.
         :return:
@@ -81,6 +81,18 @@ class MineSolver:
         self.servant.pretty_print_field()
         if self.win:
             print "You won, because you're the best maybe."
+
+    def probability_guesser(self):
+        """
+
+        :return:
+        """
+        # Get all unrevealed blocks that touch unchecked blocks
+        blocks_to_guess = set([])
+        for coordinate in self.unchecked_blocks:
+            unrevealed_blocks = self.servant.get_unrevealed_blocks(coordinate)
+            blocks_to_guess.update(unrevealed_blocks)
+            # TODO: Write a pretty printer with only unchecked and their unrevealed
 
     def remove_checked_blocks(self):
         """
