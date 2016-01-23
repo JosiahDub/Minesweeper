@@ -103,6 +103,37 @@ class MineServant:
                       for column in range(0, self.mine.columns)])
         return indices.difference(self.mine.exposed_field, self.mine.flags)
 
+    def custom_pretty_print_field(self, numbers, unrevealed):
+        """
+        Prints a custom field based on numbered and unrevealed blocks
+        :param numbers:
+        :param unrevealed:
+        :return:
+        """
+        try:
+            from termcolor import colored
+        except ImportError:
+            print "Install the termcolor module to use this method."
+            return
+        print_field = []
+        for row in range(0, self.mine.rows):
+            new_row = colored('', 'white')
+            for column in range(0, self.mine.columns):
+                # Unrevealed
+                if (row, column) in unrevealed:
+                    # Gets the real block value for more accuracy.
+                    new_row += colored('-1', self.color_coding['unrevealed'])
+                # Numbered
+                elif (row, column) in numbers:
+                    block_value = self.get_real_block_value((row, column))
+                    new_row += colored(' ' + str(block_value), self.color_coding['number'])
+                # Nothing. Two spaces
+                else:
+                    new_row += colored('  ', 'white')
+            print_field.append(new_row)
+        for row in print_field:
+            print row
+
     def pretty_print_field(self):
         """
         Prints the field using color coding so you don't have to open the GUI.
