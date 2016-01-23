@@ -1,20 +1,22 @@
-# TODO: Look at two or more confined mine procedure
-# TODO: Incorporate 50/50 mine revealer
-# TODO: Move blocks to remove to reveal/flag function
 __author__ = 'josiah'
 from Minesweeper import Minesweeper
 from MineServant import MineServant
 
 
 class MineSolver:
+    """
+    Solves Minesweeper by running through a few algorithms:
+    Flag/reveal
+    Confined Mine
+    Shared Mine
+    """
 
     def __init__(self, load_game=None):
         self.rows = 16
         self.columns = 30
         self.num_mines = 99
         if load_game is None:
-            self.mine = Minesweeper(self.rows, self.columns, self.num_mines,
-                                    gui=False)
+            self.mine = Minesweeper(self.rows, self.columns, self.num_mines, gui=False)
         else:
             self.mine = Minesweeper.load_state(load_game)
         self.servant = MineServant(self.mine)
@@ -50,6 +52,7 @@ class MineSolver:
         # Will break out if no moves found
         solver_repeat = True
         while solver_repeat:
+            # Try the easy stuff
             solver_repeat = self.flag_reveal_loop()
             # Now try the hard stuff
             for coordinate in self.unchecked_blocks:
@@ -92,7 +95,6 @@ class MineSolver:
         for coordinate in self.unchecked_blocks:
             unrevealed_blocks = self.servant.get_unrevealed_blocks(coordinate)
             blocks_to_guess.update(unrevealed_blocks)
-            # TODO: Write a pretty printer with only unchecked and their unrevealed
         self.servant.custom_pretty_print_field(self.unchecked_blocks, blocks_to_guess)
 
     def remove_checked_blocks(self):
@@ -116,7 +118,7 @@ class MineSolver:
             # Will break out if no flag or reveal
             flag_reveal_repeat = False
             for coordinate in self.unchecked_blocks:
-                # Check if are any unrevealed blocks
+                # Check if there are any unrevealed blocks
                 unrevealed = self.servant.get_unrevealed_blocks(coordinate)
                 if unrevealed:
                     reveal, flag = self.flag_reveal_process(coordinate)
@@ -236,4 +238,3 @@ class MineSolver:
                     self.reveal_squares(blocks_unrevealed.difference(neighbor_unrevealed))
                     reveal = True
         return reveal, flag
-
