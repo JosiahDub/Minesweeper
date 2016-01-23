@@ -1,6 +1,5 @@
 __author__ = 'josiah'
 from random import choice
-from math import fabs
 
 
 class MineServant:
@@ -9,7 +8,7 @@ class MineServant:
     """
     def __init__(self, mine):
         self.mine = mine
-        self.full_field = mine.get_exposed_field()
+        self.full_field = self.mine.get_exposed_field()
         self.color_coding = {'flag': 'green', 'bomb': 'red', 'unrevealed': 'yellow',
                              'zero': 'grey', 'number': 'white'}
 
@@ -111,6 +110,7 @@ class MineServant:
         :return:
         """
         try:
+            # noinspection PyUnresolvedReferences
             from termcolor import colored
         except ImportError:
             print "Install the termcolor module to use this method."
@@ -140,6 +140,7 @@ class MineServant:
         :return:
         """
         try:
+            # noinspection PyUnresolvedReferences
             from termcolor import colored
         except ImportError:
             print "Install the termcolor module to use this method."
