@@ -93,6 +93,7 @@ class MineSolver:
             unrevealed_blocks = self.servant.get_unrevealed_blocks(coordinate)
             blocks_to_guess.update(unrevealed_blocks)
             # TODO: Write a pretty printer with only unchecked and their unrevealed
+        self.servant.custom_pretty_print_field(self.unchecked_blocks, blocks_to_guess)
 
     def remove_checked_blocks(self):
         """
