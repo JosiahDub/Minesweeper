@@ -40,8 +40,7 @@ class MineSolver:
         :return:
         """
         for coord in coordinate:
-            self.lose, self.full_field, \
-                self.newly_exposed = self.mine.button_reveal(None, coord)
+            self.lose, self.full_field, self.newly_exposed = self.mine.button_reveal(None, coord)
             self.unchecked_blocks.extend(self.newly_exposed)
 
     def logical_solver(self):
@@ -121,7 +120,7 @@ class MineSolver:
                 # Check if there are any unrevealed blocks
                 unrevealed = self.servant.get_unrevealed_blocks(coordinate)
                 if unrevealed:
-                    reveal, flag = self.flag_reveal_process(coordinate)
+                    reveal, flag = self.flag_reveal_process(coordinate, unrevealed)
                     # If it hits even once, repeat flag/reveal
                     if reveal or flag:
                         flag_reveal_repeat = True
@@ -139,7 +138,7 @@ class MineSolver:
                 break
         return solver_repeat
 
-    def flag_reveal_process(self, coordinate):
+    def flag_reveal_process(self, coordinate, unrevealed):
         """
         Main process in which unrevealed blocks are found to reveal or flag.
         :param coordinate:
@@ -147,8 +146,6 @@ class MineSolver:
         """
         reveal = False
         flag = False
-        unrevealed = self.servant.get_unrevealed_blocks(coordinate)
-        # If this is zero, then remove from unchecked?
         num_unrevealed = len(unrevealed)
         real_block_value = self.servant.get_real_block_value(coordinate)
         # All mines accounted for. Reveal rest
