@@ -1,6 +1,8 @@
 __author__ = 'josiah'
 from MineSynecdoche import MineSynecdoche
 from MineServant import MineServant
+from itertools import combinations
+from random import choice
 
 
 class MineSemiSolver:
@@ -12,7 +14,7 @@ class MineSemiSolver:
         self.flags_planted = 0
         self.mine = MineSynecdoche(unrevealed, number_dictionary, rows, columns)
         self.servant = MineServant(self.mine)
-        self.unchecked_blocks = self.number_dictionary.keys().copy()
+        self.unchecked_blocks = self.number_dictionary.keys()
         self.blocks_to_remove = set([])
 
     def reveal_squares(self, coordinate):
@@ -26,6 +28,13 @@ class MineSemiSolver:
         for block in self.blocks_to_remove:
             self.unchecked_blocks.remove(block)
         self.blocks_to_remove.clear()
+
+    def choose(self):
+        for coordinate in self.unchecked_blocks:
+            unrevealed = self.servant.get_unrevealed_blocks(coordinate)
+            real_block_value = self.servant.get_real_block_value(coordinate)
+            # All possible locations of the mine(s). We need to only choose one.
+            all_sets = combinations(unrevealed, real_block_value)
 
     def flag_reveal_loop(self):
         """

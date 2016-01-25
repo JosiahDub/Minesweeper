@@ -1,6 +1,7 @@
 __author__ = 'josiah'
 from Minesweeper import Minesweeper
 from MineServant import MineServant
+from MineSemiSolver import MineSemiSolver
 
 
 class MineSolver:
@@ -91,10 +92,14 @@ class MineSolver:
         """
         # Get all unrevealed blocks that touch unchecked blocks
         blocks_to_guess = set([])
+        numbers_dictionary = {}
         for coordinate in self.unchecked_blocks:
+            numbers_dictionary[coordinate] = self.servant.get_real_block_value(coordinate)
             unrevealed_blocks = self.servant.get_unrevealed_blocks(coordinate)
             blocks_to_guess.update(unrevealed_blocks)
-        self.servant.custom_pretty_print_field(self.unchecked_blocks, blocks_to_guess)
+        # self.servant.custom_pretty_print_field(self.unchecked_blocks, blocks_to_guess)
+        semi_solver = MineSemiSolver(blocks_to_guess, numbers_dictionary, self.rows, self.columns)
+        semi_solver.choose()
 
     def remove_checked_blocks(self):
         """

@@ -11,18 +11,23 @@ class MineSynecdoche:
     def __init__(self, unrevealed, number_dictionary, rows, columns):
         self.unrevealed = unrevealed
         self.number_dictionary = number_dictionary
-        self.neighbors = self.number_dictionary.keys()
-        self.exposed_field = self.neighbors.copy()
         self.rows = rows
         self.columns = columns
+        self.neighbors = [[None for column in range(0, self.columns)]
+                          for row in range(0, self.rows)]
+        for coordinate in self.number_dictionary.keys():
+            self.neighbors[coordinate[0]][coordinate[1]] = self.number_dictionary[coordinate]
+        self.exposed_field = self.number_dictionary.keys()
         self.flags = []
         self.mine_coordinates = []
-        self.field = [[None for row in range(0, self.columns)]
-                      for column in range(0, self.rows)]
+        self.field = [[None for column in range(0, self.columns)]
+                      for row in range(0, self.rows)]
 
     def get_exposed_field(self):
+        for coordinate in self.unrevealed:
+            self.field[coordinate[0]][coordinate[1]] = -1
         for index in self.exposed_field:
-            self.field[index[0]][index[1]] = self.neighbors[index[0]][index[1]]
+            self.field[index[0]][index[1]] = self.number_dictionary[index]
         for flag in self.flags:
             self.field[flag[0]][flag[1]] = 'f'
         return self.field
