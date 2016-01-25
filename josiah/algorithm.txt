@@ -1,9 +1,6 @@
 ****PERCENTAGES*****
-xxxxx
-x111x
-x101x
-x212x
-xxxxx
+Number of mine arrangements for number 1
+Then Choose one
 
 *****GENERAL FLOW*****
 Perform the flag/reveal process repeatedly
