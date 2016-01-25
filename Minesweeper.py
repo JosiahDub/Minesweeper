@@ -17,8 +17,8 @@ class Minesweeper:
                    for column in range(0, columns)]
         self.mine_coordinates = sample(indices, self.mines)
 
-        self.neighbors = [[0 for row in range(0, self.columns)]
-                          for column in range(0, self.rows)]
+        self.neighbors = [[0 for column in range(0, self.columns)]
+                          for row in range(0, self.rows)]
 
         # Creates neighbor values
         # Loops through all mine_coordinates
