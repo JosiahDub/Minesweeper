@@ -20,17 +20,19 @@ class MineSynecdoche:
         self.exposed_field = self.number_dictionary.keys()
         self.flags = []
         self.mine_coordinates = []
-        self.field = [[None for column in range(0, self.columns)]
-                      for row in range(0, self.rows)]
+        # self.field = [[None for column in range(0, self.columns)]
+        #               for row in range(0, self.rows)]
 
     def get_exposed_field(self):
+        field = [[None for column in range(0, self.columns)]
+                 for row in range(0, self.rows)]
         for coordinate in self.unrevealed:
-            self.field[coordinate[0]][coordinate[1]] = -1
+            field[coordinate[0]][coordinate[1]] = -1
         for index in self.exposed_field:
-            self.field[index[0]][index[1]] = self.number_dictionary[index]
+            field[index[0]][index[1]] = self.number_dictionary[index]
         for flag in self.flags:
-            self.field[flag[0]][flag[1]] = 'f'
-        return self.field
+            field[flag[0]][flag[1]] = 'f'
+        return field
 
     def get_num_flag_neighbors(self, coordinate):
         """
