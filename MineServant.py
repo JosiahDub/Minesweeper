@@ -102,11 +102,12 @@ class MineServant:
                       for column in range(0, self.mine.columns)])
         return indices.difference(self.mine.exposed_field, self.mine.flags)
 
-    def custom_pretty_print_field(self, numbers, unrevealed):
+    def custom_pretty_print_field(self, numbers, unrevealed=None, flags=None):
         """
-        Prints a custom field based on numbered and unrevealed blocks
+        Prints a custom field based on desired blocks.
         :param numbers:
         :param unrevealed:
+        :param flags:
         :return:
         """
         try:
@@ -120,13 +121,15 @@ class MineServant:
             new_row = colored('', 'white')
             for column in range(0, self.mine.columns):
                 # Unrevealed
-                if (row, column) in unrevealed:
+                if unrevealed is not None and (row, column) in unrevealed:
                     # Gets the real block value for more accuracy.
                     new_row += colored('-1', self.color_coding['unrevealed'])
                 # Numbered
                 elif (row, column) in numbers:
                     block_value = self.get_real_block_value((row, column))
                     new_row += colored(' ' + str(block_value), self.color_coding['number'])
+                elif flags is not None and (row, column) in flags:
+                    new_row += colored(' f', self.color_coding['flag'])
                 # Nothing. Two spaces
                 else:
                     new_row += colored('  ', 'white')
