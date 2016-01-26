@@ -33,6 +33,7 @@ class MineSolver:
         # Lose/win status. Both start as false naturally
         self.lose = False
         self.win = False
+        self.semi_solver = None
 
     def reveal_squares(self, coordinate):
         """
@@ -98,8 +99,9 @@ class MineSolver:
             unrevealed_blocks = self.servant.get_unrevealed_blocks(coordinate)
             blocks_to_guess.update(unrevealed_blocks)
         # self.servant.custom_pretty_print_field(self.unchecked_blocks, blocks_to_guess)
-        semi_solver = MineSemiSolver(blocks_to_guess, numbers_dictionary, self.rows, self.columns)
-        semi_solver.choose()
+        self.semi_solver = MineSemiSolver(blocks_to_guess, numbers_dictionary, self.rows, self.columns)
+        self.semi_solver.choose()
+        self.servant.custom_pretty_print_field(self.unchecked_blocks, flags=self.semi_solver.flags)
 
     def remove_checked_blocks(self):
         """

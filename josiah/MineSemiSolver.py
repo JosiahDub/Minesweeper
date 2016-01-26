@@ -1,27 +1,31 @@
 __author__ = 'josiah'
-from MineSynecdoche import MineSynecdoche
-from MineServant import MineServant
 from itertools import combinations
 from random import choice
 
 
 class MineSemiSolver:
     def __init__(self, unrevealed, number_dictionary, rows, columns):
-        self.unrevealed = unrevealed
         self.number_dictionary = number_dictionary
         self.rows = rows
         self.columns = columns
-        self.flags_planted = 0
-        self.mine = MineSynecdoche(unrevealed, number_dictionary, rows, columns)
-        self.full_field = self.mine.get_exposed_field()
-        self.servant = MineServant(self.mine)
+        self.flags = []
+        self.field = [[0 for column in range(0, self.columns)]
+                      for row in range(0, self.rows)]
+        for coordinate in self.number_dictionary.keys():
+            self.field[coordinate[0]][coordinate[1]] = self.number_dictionary[coordinate]
+        for coordinate in unrevealed:
+            self.field[coordinate[0]][coordinate[1]] = -1
         self.unchecked_blocks = self.number_dictionary.keys()
         self.blocks_to_remove = set([])
         self.possible_plays = []
 
     def reveal_squares(self, coordinate):
         # self.unrevealed.remove(coordinate)
-        self.mine.unrevealed.remove(coordinate)
+        self.field[coordinate[0]][coordinate[1]] = 0
+
+    def plant_flag(self, coordinate):
+        self.flags.append(coordinate)
+        self.field[coordinate[0]][coordinate[1]] = 0
 
     def remove_checked_blocks(self):
         """
@@ -33,76 +37,91 @@ class MineSemiSolver:
         self.blocks_to_remove.clear()
 
     def choose(self):
-        # TODO: self.servant full field is not getting updated, returning removed unrevealed.
         for coordinate in self.unchecked_blocks:
-            print '*****COORDINATE*****', coordinate
-            print 'global unrevealed: ', self.mine.unrevealed
-            unrevealed = self.servant.get_unrevealed_blocks(coordinate)
-            print 'unrevealed: ', unrevealed
-            real_block_value = self.servant.get_real_block_value(coordinate)
-            print 'block val: ', real_block_value
+            real_block_value = self.get_real_block_value(coordinate)
+            unrevealed = self.get_unrevealed_blocks(coordinate)
+            if real_block_value <= 0 or len(unrevealed) == 0:
+                continue
             # All possible locations of the mine(s). We need to only choose one.
             all_sets = combinations(unrevealed, real_block_value)
             chosen_placement = choice(list(all_sets))
-            print 'chosen: ', chosen_placement
             not_chosen = set(unrevealed).copy()
-            print 'not before: ', not_chosen
             for chosen in chosen_placement:
+                self.plant_flag(chosen)
                 not_chosen.remove(chosen)
-                self.mine.flags.append(chosen)
-                self.mine.unrevealed.remove(chosen)
-            print 'not now: ', not_chosen
             for index in not_chosen:
-                self.mine.unrevealed.remove(index)
-        print self.unrevealed
+                self.field[index[0]][index[1]] = 0
 
-    def flag_reveal_loop(self):
+    def get_real_block_value(self, coordinate):
         """
-        A loop to call flag_reveal_process in an efficient manner.
-        :return:
-        """
-        solver_repeat = False
-        flag_reveal_repeat = True
-        # Do the easy stuff first
-        while flag_reveal_repeat:
-            # Will break out if no flag or reveal
-            flag_reveal_repeat = False
-            for coordinate in self.unchecked_blocks:
-                # Check if there are any unrevealed blocks
-                unrevealed = self.servant.get_unrevealed_blocks(coordinate)
-                if unrevealed:
-                    reveal, flag = self.flag_reveal_process(coordinate, unrevealed)
-                    # If it hits even once, repeat flag/reveal
-                    if reveal or flag:
-                        flag_reveal_repeat = True
-                # If not, schedule block for deletion after for loop.
-                else:
-                    self.blocks_to_remove.add(coordinate)
-            # Remove blocks before moving on
-            if self.blocks_to_remove:
-                self.remove_checked_blocks()
-        return solver_repeat
-
-    def flag_reveal_process(self, coordinate, unrevealed):
-        """
-        Main process in which unrevealed blocks are found to reveal or flag.
+        Returns the real block value, subtracting neighboring flags.
         :param coordinate:
         :return:
         """
-        reveal = False
-        flag = False
-        num_unrevealed = len(unrevealed)
-        real_block_value = self.servant.get_real_block_value(coordinate)
-        # All mines accounted for. Reveal rest
-        if real_block_value == 0:
-            self.reveal_squares(unrevealed)
-            self.blocks_to_remove.add(coordinate)
-            reveal = True
-        # All unrevealed are mines. Flag them
-        elif real_block_value == num_unrevealed:
-            for coord in unrevealed:
-                self.mine.flags.append(coord)
-                self.flags_planted += 1
-            self.blocks_to_remove.add(coordinate)
-            flag = True
-        return reveal, flag
+        block_value = self.field[coordinate[0]][coordinate[1]]
+        flags = self.get_num_flag_neighbors(coordinate)
+        return block_value - flags
+
+    def get_unrevealed_blocks(self, coordinate):
+        """
+        Returns the coordinates for all unrevealed blocks around a coordinate.
+        :param coordinate:
+        :return:
+        """
+        surrounding_coords = self.get_surrounding_block_coords(coordinate)
+        unrevealed_coords = []
+        for coord in surrounding_coords:
+            if self.field[coord[0]][coord[1]] == -1:
+                unrevealed_coords.append(coord)
+        return unrevealed_coords
+
+    def get_num_flag_neighbors(self, coordinate):
+        """
+        Returns number of flags around the square
+        :param coordinate:
+        :return:
+        """
+        flag_neighbors = 0
+        surrounding_coords = set(self.get_surrounding_block_coords(coordinate))
+        for coord in surrounding_coords:
+            if coord in self.flags:
+                flag_neighbors += 1
+        return flag_neighbors
+
+    def get_surrounding_block_coords(self, coordinate):
+        """
+        Gets the coordinates for all blocks surrounding the desires coords.
+        :param coordinate:
+        :return:
+        """
+        # Rows
+        # On bottom
+        if coordinate[0] == self.rows - 1:
+            start_row = coordinate[0] - 1
+            end_row = self.rows - 1
+        # On top
+        elif coordinate[0] == 0:
+            start_row = 0
+            end_row = 1
+        # Middle
+        else:
+            start_row = coordinate[0] - 1
+            end_row = coordinate[0] + 1
+        # Columns
+        # On left edge
+        if coordinate[1] == self.columns - 1:
+            start_column = coordinate[1] - 1
+            end_column = self.columns - 1
+        # On right edge
+        elif coordinate[1] == 0:
+            start_column = 0
+            end_column = 1
+        # Middle
+        else:
+            start_column = coordinate[1] - 1
+            end_column = coordinate[1] + 1
+        # Create list of lists for the range
+        surrounding_blocks = [(row, column)
+                              for row in range(start_row, end_row + 1)
+                              for column in range(start_column, end_column + 1)]
+        return surrounding_blocks
