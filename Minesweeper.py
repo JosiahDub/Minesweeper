@@ -257,26 +257,13 @@ class Minesweeper:
         :param coordinate:
         :return:
         """
-        flag_neighbors = 0
-        surrounding_coords = self.get_surrounding_block_coords(coordinate)
-        for coord in surrounding_coords:
-            if coord in self.flags:
-                flag_neighbors += 1
+        # Gets all surround coordinates
+        flag_coords = set(self.get_surrounding_block_coords(coordinate))
+        # Reduces to what's in self.flags
+        flag_coords.intersection_update(self.flags)
+        # Gets the length of that
+        flag_neighbors = len(flag_coords)
         return flag_neighbors
-
-    # TODO: Candidate for deletion
-    def get_flag_neighbor_coords(self, coordinate):
-        """
-        Returns the coordinates for all flags surrounding the coordinate.
-        :param coordinate:
-        :return:
-        """
-        flag_coords = []
-        surrounding_coords = self.get_surrounding_block_coords(coordinate)
-        for coord in surrounding_coords:
-            if coord in self.flags:
-                flag_coords.append(coord)
-        return flag_coords
 
     def get_surrounding_block_coords(self, coordinate):
         """
