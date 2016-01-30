@@ -38,8 +38,8 @@ class Minesweeper:
         self.newly_exposed = []
 
         # What the player sees
-        self.field = [[-1 for row in range(0, self.columns)]
-                      for column in range(0, self.rows)]
+        # self.field = [[-1 for row in range(0, self.columns)]
+        #               for column in range(0, self.rows)]
 
         # Coordinates of planted flags as tuples
         self.flags = []
@@ -175,9 +175,6 @@ class Minesweeper:
         self.flags = []
         self.exposed_field = []
         self.newly_exposed = []
-        self.field = [[-1 for row in range(0, self.columns)]
-                      for column in range(0, self.rows)]
-        return self.field
 
     def get_zero_neighbors(self):
         """
@@ -201,15 +198,13 @@ class Minesweeper:
         # Delete required but useless event handle
         del event
         lose = False
-        exposed_field = []
         newly_exposed = []
         if button_tuple not in self.flags:
             button_handle = self.button_fields[button_tuple]
             button_text = str(self.neighbors[button_tuple[0]][button_tuple[1]])
             button_handle.configure(text=button_text)
-            lose, exposed_field, \
-                newly_exposed = self.reveal_wrapper([button_tuple])
-        return lose, exposed_field, newly_exposed
+            lose, newly_exposed = self.reveal_wrapper([button_tuple])
+        return lose, newly_exposed
 
     def button_mass_reveal(self, event, button_tuple):
         """
@@ -221,15 +216,14 @@ class Minesweeper:
         # Delete required but useless event handle
         del event
         lose = False
-        exposed_field = []
         button_value = self.neighbors[button_tuple[0]][button_tuple[1]]
         # Button needs to be exposed and not flagged
         if button_tuple in self.exposed_field and button_tuple not in self.flags:
             # Neighbor must equal number of flags.
             if button_value == self.get_num_flag_neighbors(button_tuple):
                 coords = self.get_surrounding_block_coords(button_tuple)
-                lose, exposed_field, newly_exposed = self.reveal_wrapper(coords)
-        return lose, exposed_field
+                lose, newly_exposed = self.reveal_wrapper(coords)
+        return lose
 
     def button_flag(self, event, button_tuple):
         """
@@ -249,7 +243,7 @@ class Minesweeper:
             self.flags.append(button_tuple)
             button_handle.configure(text='f')
             button_handle.configure(background=self.gui_colors['flag'])
-        return self.for_the_win(), self.get_exposed_field()
+        return self.for_the_win()
 
     def get_num_flag_neighbors(self, coordinate):
         """
@@ -311,22 +305,6 @@ class Minesweeper:
         print "You win. Good job. It was so tough."
         return self.get_full_field()
 
-    def get_exposed_field(self):
-        """
-        Returns a MxN field exposed by the player.
-        -1: Unexposed block
-        0-8: number of neighboring mines
-        'f': flag
-        'b': bomb
-
-        :return:
-        """
-        for index in self.exposed_field:
-            self.field[index[0]][index[1]] = self.neighbors[index[0]][index[1]]
-        for flag in self.flags:
-            self.field[flag[0]][flag[1]] = 'f'
-        return self.field
-
     def get_full_field(self):
         """
         Returns the entire field, minus flags.
@@ -355,7 +333,7 @@ class Minesweeper:
             else:
                 self.flags.remove(coordinate)
         # After planting (or removing), check for win
-        return self.for_the_win(), self.get_exposed_field()
+        return self.for_the_win()
 
     def for_the_win(self):
         """
@@ -379,7 +357,7 @@ class Minesweeper:
         """
         self.newly_exposed = []
         lose = self.reveal_squares(coordinates)
-        return lose, self.get_exposed_field(), self.newly_exposed
+        return lose, self.newly_exposed
 
     def reveal_squares(self, coordinates):
         """

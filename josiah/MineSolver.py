@@ -21,7 +21,6 @@ class MineSolver:
         else:
             self.mine = Minesweeper.load_state(load_game)
         self.servant = MineServant(self.mine)
-        self.full_field = self.mine.get_exposed_field()
         self.exposed_indices = self.mine.exposed_field
         # Move these to self.unchecked_blocks
         self.newly_exposed = []
@@ -42,7 +41,7 @@ class MineSolver:
         :return:
         """
         for coord in coordinate:
-            self.lose, self.full_field, self.newly_exposed = self.mine.button_reveal(None, coord)
+            self.lose, self.newly_exposed = self.mine.button_reveal(None, coord)
             self.unchecked_blocks.extend(self.newly_exposed)
 
     def logical_solver(self):
@@ -82,7 +81,7 @@ class MineSolver:
                 self.remove_checked_blocks()
         print "Out of moves. Full field:"
         # Quasi pretty-prints the field for the console.
-        self.servant.pretty_print_field()
+        self.servant.new_pretty_print_field()
         if self.win:
             print "You won, because you're the best maybe."
 
@@ -99,9 +98,9 @@ class MineSolver:
             unrevealed_blocks = self.servant.get_unrevealed_blocks(coordinate)
             blocks_to_guess.update(unrevealed_blocks)
         # self.servant.custom_pretty_print_field(self.unchecked_blocks, blocks_to_guess)
-        self.semi_solver = MineSemiSolver(blocks_to_guess, numbers_dictionary, self.rows, self.columns)
-        self.semi_solver.choose()
-        self.servant.custom_pretty_print_field(self.unchecked_blocks, flags=self.semi_solver.flags)
+        # self.semi_solver = MineSemiSolver(blocks_to_guess, numbers_dictionary, self.rows, self.columns)
+        # self.semi_solver.choose()
+        self.servant.custom_pretty_print_field(self.unchecked_blocks, unrevealed=blocks_to_guess)
 
     def remove_checked_blocks(self):
         """
@@ -163,7 +162,7 @@ class MineSolver:
         # All unrevealed are mines. Flag them
         elif real_block_value == num_unrevealed:
             for coord in unrevealed:
-                self.win, self.full_field = self.mine.button_flag(None, coord)
+                self.win = self.mine.button_flag(None, coord)
                 self.flags_planted += 1
             self.blocks_to_remove.add(coordinate)
             flag = True
@@ -197,7 +196,7 @@ class MineSolver:
                 # Flag blocks outside of area.
                 if real_block_value == num_outside + mines_in_area:
                     for block in blocks_out_of_area:
-                        self.win, self.full_field = self.mine.button_flag(None, block)
+                        self.win = self.mine.button_flag(None, block)
                         self.flags_planted += 1
                     flag = True
                 # Reveal blocks outside area
@@ -233,7 +232,7 @@ class MineSolver:
                     neighbor_real_block_value == neighbors_outside_area + possible_area_mines:
                 # Flag neighbor blocks not shared with coordinate
                 for block in neighbor_unrevealed.difference(blocks_unrevealed):
-                    self.win, self.full_field = self.mine.button_flag(None, block)
+                    self.win = self.mine.button_flag(None, block)
                     self.flags_planted += 1
                 flag = True
                 # Check if the original block can reveal things.

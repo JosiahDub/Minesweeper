@@ -8,16 +8,15 @@ class MineServant:
     """
     def __init__(self, mine):
         self.mine = mine
-        self.full_field = self.mine.get_exposed_field()
         self.color_coding = {'flag': 'green', 'bomb': 'red', 'unrevealed': 'yellow',
                              'zero': 'grey', 'number': 'white'}
 
     def reset(self):
         """
-        Calls the Minesweeper reset function and updates itself
+        Calls the Minesweeper reset function.
         :return:
         """
-        self.full_field = self.mine.reset()
+        self.mine.reset()
 
     def get_unrevealed_blocks(self, coordinate):
         """
@@ -28,7 +27,8 @@ class MineServant:
         surrounding_coords = self.mine.get_surrounding_block_coords(coordinate)
         unrevealed_coords = []
         for coord in surrounding_coords:
-            if self.full_field[coord[0]][coord[1]] == -1:
+            # If the coordinate isn't in exposed field or flags, it's unrevealed.
+            if coord not in self.mine.exposed_field and coord not in self.mine.flags:
                 unrevealed_coords.append(coord)
         return unrevealed_coords
 
@@ -52,7 +52,7 @@ class MineServant:
         neighbor_coords = []
         for coord in surrounding_coords:
             # Do not return the original coordinate
-            if coord != coordinate and 0 < self.full_field[coord[0]][coord[1]] < 9:
+            if coord != coordinate and coord in self.mine.exposed_field:
                 neighbor_coords.append(coord)
         return neighbor_coords
 
@@ -137,7 +137,7 @@ class MineServant:
         for row in print_field:
             print row
 
-    def pretty_print_field(self):
+    def new_pretty_print_field(self):
         """
         Prints the field using color coding so you don't have to open the GUI.
         :return:
@@ -149,24 +149,28 @@ class MineServant:
             print "Install the termcolor module to use this method."
             return
         print_field = []
-        for row in self.full_field:
+        for row in range(0, self.mine.rows):
             new_row = colored('', 'white')
-            for block in row:
-                # Unrevealed: yellow
-                if block == -1:
+            for column in range(0, self.mine.columns):
+                # Unrevealed
+                if (row, column) in self.mine.exposed_field:
+                    # Bomb
+                    if (row, column) in self.mine.mine_coordinates:
+                        new_row += colored(' b', self.color_coding['bomb'])
+                    else:
+                        # Gets the real block value for more accuracy.
+                        block_value = self.mine.neighbors[row][column]
+                        # Zero
+                        if block_value == 0:
+                            new_row += colored(' 0', self.color_coding['zero'])
+                        # 1-8
+                        else:
+                            new_row += colored(' ' + str(block_value), self.color_coding['number'])
+                elif (row, column) in self.mine.flags:
+                    new_row += colored(' f', self.color_coding['flag'])
+                # Unexposed
+                else:
                     new_row += colored('-1', self.color_coding['unrevealed'])
-                # Revealed: zero
-                elif block == 0:
-                    new_row += colored(' ' + str(block), self.color_coding['zero'])
-                # Revealed: greater than zero
-                elif 1 <= block <= 8:
-                    new_row += colored(' ' + str(block), self.color_coding['number'])
-                # Flagged: green
-                elif block == 'f':
-                    new_row += colored(' ' + block, self.color_coding['flag'])
-                # Bomb: red
-                elif block == 'b':
-                    new_row += colored(' ' + block, self.color_coding['bomb'])
             print_field.append(new_row)
         for row in print_field:
             print row
