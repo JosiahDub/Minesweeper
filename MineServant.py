@@ -49,11 +49,10 @@ class MineServant:
         :return:
         """
         surrounding_coords = self.mine.get_surrounding_block_coords(coordinate)
-        neighbor_coords = []
-        for coord in surrounding_coords:
-            # Do not return the original coordinate
-            if coord != coordinate and coord in self.mine.exposed_field:
-                neighbor_coords.append(coord)
+        # Gets the mines shared in surrounding coords and exposed field
+        neighbor_coords = set(surrounding_coords).intersection(self.mine.exposed_field)
+        # Remove original coordinate
+        neighbor_coords.remove(coordinate)
         return neighbor_coords
 
     def get_exposed_neighbor_coords(self, coordinate):
@@ -137,7 +136,7 @@ class MineServant:
         for row in print_field:
             print row
 
-    def new_pretty_print_field(self):
+    def pretty_print_field(self):
         """
         Prints the field using color coding so you don't have to open the GUI.
         :return:
