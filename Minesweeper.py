@@ -265,32 +265,12 @@ class Minesweeper:
         :param coordinate:
         :return:
         """
-        # Rows
-        # On bottom
-        if coordinate[0] == self.rows - 1:
-            start_row = coordinate[0] - 1
-            end_row = self.rows - 1
-        # On top
-        elif coordinate[0] == 0:
-            start_row = 0
-            end_row = 1
-        # Middle
-        else:
-            start_row = coordinate[0] - 1
-            end_row = coordinate[0] + 1
-        # Columns
-        # On left edge
-        if coordinate[1] == self.columns - 1:
-            start_column = coordinate[1] - 1
-            end_column = self.columns - 1
-        # On right edge
-        elif coordinate[1] == 0:
-            start_column = 0
-            end_column = 1
-        # Middle
-        else:
-            start_column = coordinate[1] - 1
-            end_column = coordinate[1] + 1
+        # Will choose 0 if coordinate is 0
+        start_row = max(0, coordinate[0] - 1)
+        # Will choose rows - 1 if coordinate is rows - 1
+        end_row = min(coordinate[0] + 1, self.rows - 1)
+        start_column = max(0, coordinate[1] - 1)
+        end_column = min(coordinate[1] + 1, self.columns - 1)
         # Create list of lists for the range
         surrounding_blocks = [(row, column)
                               for row in range(start_row, end_row + 1)
