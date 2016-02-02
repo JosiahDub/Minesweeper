@@ -22,7 +22,7 @@ class MineSolver:
             self.mine = Minesweeper.load_state(load_game)
         self.servant = MineServant(self.mine)
         self.exposed_indices = self.mine.exposed_field
-        # Move these to self.unchecked_blocks
+        # Move these to self.exposed_field
         self.newly_exposed = []
         # Add block indices to here as they're revealed
         self.unchecked_blocks = []
@@ -81,7 +81,7 @@ class MineSolver:
                 self.remove_checked_blocks()
         print "Out of moves. Full field:"
         # Quasi pretty-prints the field for the console.
-        self.servant.new_pretty_print_field()
+        self.servant.pretty_print_field()
         if self.win:
             print "You won, because you're the best maybe."
 
@@ -97,14 +97,14 @@ class MineSolver:
             numbers_dictionary[coordinate] = self.servant.get_real_block_value(coordinate)
             unrevealed_blocks = self.servant.get_unrevealed_blocks(coordinate)
             blocks_to_guess.update(unrevealed_blocks)
-        # self.servant.custom_pretty_print_field(self.unchecked_blocks, blocks_to_guess)
-        # self.semi_solver = MineSemiSolver(blocks_to_guess, numbers_dictionary, self.rows, self.columns)
-        # self.semi_solver.choose()
-        self.servant.custom_pretty_print_field(self.unchecked_blocks, unrevealed=blocks_to_guess)
+        # self.servant.custom_pretty_print_field(self.exposed_field, blocks_to_guess)
+        self.semi_solver = MineSemiSolver(blocks_to_guess, numbers_dictionary, self.rows, self.columns)
+        self.semi_solver.choose()
+        # self.servant.custom_pretty_print_field(self.exposed_field, unrevealed=blocks_to_guess)
 
     def remove_checked_blocks(self):
         """
-        Removes self.blocks_to_remove from self.unchecked_blocks.
+        Removes self.blocks_to_remove from self.exposed_field.
         :return:
         """
         for block in self.blocks_to_remove:
