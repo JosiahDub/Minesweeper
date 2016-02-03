@@ -16,17 +16,15 @@ class Minesweeper:
         indices = [(row, column) for row in range(0, rows)
                    for column in range(0, columns)]
         self.mine_coordinates = sample(indices, self.mines)
-
-        self.neighbors = [[0 for column in range(0, self.columns)]
-                          for row in range(0, self.rows)]
-
+        self.neighbors = {(row, column): 0 for column in range(0, self.columns)
+                          for row in range(0, self.rows)}
         # Creates neighbor values
         # Loops through all mine_coordinates
         for mine in self.mine_coordinates:
             # Gets a 3x3 box around the mine. Technically includes mine
             coords = self.get_surrounding_block_coords(mine)
             for coord in coords:
-                self.neighbors[coord[0]][coord[1]] += 1
+                self.neighbors[coord] += 1
 
         # List of all blocks with no mines neighboring
         self.zero_neighbors = self.get_zero_neighbors()
@@ -149,7 +147,8 @@ class Minesweeper:
         # Exposed
         for coord in mine.exposed_field:
             button_handle = mine.button_fields[coord]
-            button_text = str(mine.neighbors[coord[0]][coord[1]])
+            button_text = str(mine.neighbors[coord])
+            # button_text = str(mine.neighbors[coord])
             button_handle.configure(text=button_text)
         # Flags
         for coord in mine.flags:
@@ -182,10 +181,9 @@ class Minesweeper:
         :return:
         """
         zero_neighbors = []
-        for row_index in range(0, self.rows):
-            for col_index in range(0, self.columns):
-                if self.neighbors[row_index][col_index] == 0:
-                    zero_neighbors.append((row_index, col_index))
+        for neighbor_key in self.neighbors.keys():
+            if self.neighbors[neighbor_key] == 0:
+                zero_neighbors.append(neighbor_key)
         return zero_neighbors
 
     def button_reveal(self, event, button_tuple):
@@ -201,7 +199,7 @@ class Minesweeper:
         newly_exposed = []
         if button_tuple not in self.flags:
             button_handle = self.button_fields[button_tuple]
-            button_text = str(self.neighbors[button_tuple[0]][button_tuple[1]])
+            button_text = str(self.neighbors[button_tuple])
             button_handle.configure(text=button_text)
             lose, newly_exposed = self.reveal_wrapper([button_tuple])
         return lose, newly_exposed
@@ -216,7 +214,7 @@ class Minesweeper:
         # Delete required but useless event handle
         del event
         lose = False
-        button_value = self.neighbors[button_tuple[0]][button_tuple[1]]
+        button_value = self.neighbors[button_tuple]
         # Button needs to be exposed and not flagged
         if button_tuple in self.exposed_field and button_tuple not in self.flags:
             # Neighbor must equal number of flags.
@@ -361,7 +359,7 @@ class Minesweeper:
                     button_text = 'b'
                     lose = True
                 else:
-                    button_text = self.neighbors[coordinate[0]][coordinate[1]]
+                    button_text = self.neighbors[coordinate]
                     self.exposed_field.append(coordinate)
                     # If the neighbor is empty, reveal its neighborhood
                     if button_text == 0:
