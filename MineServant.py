@@ -38,7 +38,7 @@ class MineServant:
         :param coordinate:
         :return:
         """
-        block_value = self.mine.neighbors[coordinate[0]][coordinate[1]]
+        block_value = self.mine.neighbors[coordinate]
         flags = self.mine.get_num_flag_neighbors(coordinate)
         return block_value - flags
 
@@ -156,7 +156,7 @@ class MineServant:
                         new_row += colored(' b', self.color_coding['bomb'])
                     else:
                         # Gets the real block value for more accuracy.
-                        block_value = self.mine.neighbors[row][column]
+                        block_value = self.mine.neighbors[(row, column)]
                         # Zero
                         if block_value == 0:
                             new_row += colored(' 0', self.color_coding['zero'])
