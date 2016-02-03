@@ -5,14 +5,14 @@ from random import choice
 
 
 class MineSemiSolver:
-    def __init__(self, unrevealed, number_dictionary, rows, columns):
+    def __init__(self, unrevealed, neighbors, rows, columns):
         self.unrevealed = unrevealed
-        self.number_dictionary = number_dictionary
+        self.neighbors = neighbors
         self.rows = rows
         self.columns = columns
         self.flags = []
         self.servant = MineServant(self)
-        self.exposed_field = self.number_dictionary.keys()
+        self.exposed_field = self.neighbors.keys()
         self.possible_plays = []
         self.color_coding = {'flag': 'green', 'bomb': 'red', 'unrevealed': 'yellow',
                              'zero': 'grey', 'number': 'white'}
@@ -22,7 +22,7 @@ class MineSemiSolver:
                                                unrevealed=self.unrevealed, flags=self.flags)
         for coordinate in self.exposed_field:
             print '*****COORDINATE*****', coordinate
-            real_block_value = self.get_real_block_value(coordinate)
+            real_block_value = self.servant.get_real_block_value(coordinate)
             unrevealed = self.get_unrevealed_blocks(coordinate)
             if real_block_value == 0 and len(unrevealed) > 0:
                 for index in unrevealed:
@@ -36,6 +36,14 @@ class MineSemiSolver:
             valid_moves = []
             for move_set in all_sets:
                 valid_move = self.validate_move(move_set)
+                blocks_to_remove = unrevealed.difference(move_set)
+                print "blocks to remove: ", blocks_to_remove
+                neighbors = self.servant.get_neighbor_blocks(coordinate)
+                for neighbor in neighbors:
+                    # Look at each move
+                    # Remove that move if one of the blocks to remove is inside
+                    # If no more moves, its not valid
+                    pass
                 # Adds valid moves to the list
                 if valid_move:
                     valid_moves.append(move_set)
@@ -61,22 +69,12 @@ class MineSemiSolver:
             shared_neighbors.intersection_update(new_neighbors)
         # Loop through and check if any are too low.
         for neighbor in shared_neighbors:
-            block_value = self.get_real_block_value(neighbor)
+            block_value = self.servant.get_real_block_value(neighbor)
             # Any neighbor can invalidate the move
             if block_value < len(coordinate_set):
                 valid_move = False
                 break
         return valid_move
-
-    def get_real_block_value(self, coordinate):
-        """
-        Returns the real block value, subtracting neighboring flags.
-        :param coordinate:
-        :return:
-        """
-        block_value = self.number_dictionary[coordinate]
-        flags = self.get_num_flag_neighbors(coordinate)
-        return block_value - flags
 
     def get_unrevealed_blocks(self, coordinate):
         """
@@ -90,6 +88,7 @@ class MineSemiSolver:
         unrevealed_coords.intersection_update(self.unrevealed)
         return unrevealed_coords
 
+    # TODO: Can be inherited from Minesweeper
     def get_num_flag_neighbors(self, coordinate):
         """
         Returns number of flags around the coordinate
@@ -104,6 +103,7 @@ class MineSemiSolver:
         flag_neighbors = len(flag_coords)
         return flag_neighbors
 
+    # TODO: Can be inherited from Minesweeper
     def get_surrounding_block_coords(self, coordinate):
         """
         Gets the coordinates for all blocks surrounding the desires coords.
@@ -121,38 +121,3 @@ class MineSemiSolver:
                               for row in range(start_row, end_row + 1)
                               for column in range(start_column, end_column + 1)]
         return set(surrounding_blocks)
-
-    def custom_pretty_print_field(self, numbers, unrevealed=None, flags=None):
-        """
-        Prints a custom field based on desired blocks.
-        :param numbers:
-        :param unrevealed:
-        :param flags:
-        :return:
-        """
-        try:
-            # noinspection PyUnresolvedReferences
-            from termcolor import colored
-        except ImportError:
-            print "Install the termcolor module to use this method."
-            return
-        print_field = []
-        for row in range(0, self.rows):
-            new_row = colored('', 'white')
-            for column in range(0, self.columns):
-                # Unrevealed
-                if unrevealed is not None and (row, column) in unrevealed:
-                    # Gets the real block value for more accuracy.
-                    new_row += colored('-1', self.color_coding['unrevealed'])
-                # Numbered
-                elif (row, column) in numbers:
-                    block_value = self.get_real_block_value((row, column))
-                    new_row += colored(' ' + str(block_value), self.color_coding['number'])
-                elif flags is not None and (row, column) in flags:
-                    new_row += colored(' f', self.color_coding['flag'])
-                # Nothing. Two spaces
-                else:
-                    new_row += colored('  ', 'white')
-            print_field.append(new_row)
-        for row in print_field:
-            print row

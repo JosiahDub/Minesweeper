@@ -1,6 +1,12 @@
 ****PERCENTAGES*****
-Number of mine arrangements for number 1
-Then Choose one
+Get all possible moves
+Loops through moves
+Find all neighbors next to area
+If num_blocks > block value, invalid
+
+Look at each move
+Look at each neighbor
+If the unrevealed that will be removed removes all possible moves from neighbor, then invalid
 
 *****GENERAL FLOW*****
 Perform the flag/reveal process repeatedly
