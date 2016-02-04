@@ -34,26 +34,52 @@ class MineSemiSolver:
             all_sets = combinations(list(unrevealed), real_block_value)
             # Validates all moves
             valid_moves = []
+            # TODO: Still not catching the second validation!
             for move_set in all_sets:
                 valid_move = self.validate_move(move_set)
-                blocks_to_remove = unrevealed.difference(move_set)
-                print "blocks to remove: ", blocks_to_remove
-                neighbors = self.servant.get_neighbor_blocks(coordinate)
+                # Have to look at it from the perspective of the blocks to remove
+                blocks_to_remove = list(unrevealed.difference(move_set))
+                print 'blocks to remove: ', blocks_to_remove
+                # check doesn't need to be performed for zero blocks
+                if len(blocks_to_remove) == 0:
+                    continue
+                # Gets the neighbors attached to the blocks to remove
+                neighbors = self.servant.get_neighbor_blocks(blocks_to_remove[0])
+                for block in blocks_to_remove[1:]:
+                    neighbors.update(self.servant.get_neighbor_blocks(block))
+                # Remove original coordinate
+                neighbors.remove(coordinate)
+                # Now look at each neighbor and their unrevealed
                 for neighbor in neighbors:
-                    # Look at each move
-                    # Remove that move if one of the blocks to remove is inside
-                    # If no more moves, its not valid
-                    pass
+                    neighbor_block_value = self.servant.get_real_block_value(neighbor)
+                    # Skip the neighbor if neighbor has been dealt
+                    if neighbor_block_value == 0:
+                        continue
+                    neighbor_unrevealed = self.get_unrevealed_blocks(neighbor)
+                    # Remove unrevealed from the move
+                    for move in move_set:
+                        if move in neighbor_unrevealed:
+                            neighbor_unrevealed.remove(move)
+                    # If there are fewer blocks than the value, then the move is bad
+                    if len(neighbor_unrevealed) < neighbor_block_value:
+                        valid_move = False
                 # Adds valid moves to the list
                 if valid_move:
                     valid_moves.append(move_set)
-            chosen_placement = choice(valid_moves)
-            for chosen in chosen_placement:
-                self.flags.append(chosen)
-            for index in unrevealed:
-                self.unrevealed.remove(index)
-            self.servant.custom_pretty_print_field(self.exposed_field,
-                                                   unrevealed=self.unrevealed, flags=self.flags)
+            try:
+                chosen_placement = choice(valid_moves)
+            except IndexError:
+                print 'no moves!'
+            else:
+                for chosen in chosen_placement:
+                    self.flags.append(chosen)
+                for index in unrevealed:
+                    self.unrevealed.remove(index)
+                self.servant.custom_pretty_print_field(self.exposed_field,
+                                                       unrevealed=self.unrevealed,
+                                                       flags=self.flags)
+        self.servant.custom_pretty_print_field(self.exposed_field, unrevealed=self.unrevealed,
+                                               flags=self.flags)
 
     def validate_move(self, coordinate_set):
         """
