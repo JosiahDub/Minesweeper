@@ -34,62 +34,40 @@ class MineSemiSolver:
             all_sets = combinations(list(unrevealed), real_block_value)
             # Validates all moves
             valid_moves = []
-            # TODO: Still not catching the second validation!
             for move_set in all_sets:
-                valid_move = self.validate_move(move_set)
-                # Have to look at it from the perspective of the blocks to remove
-                blocks_to_remove = list(unrevealed.difference(move_set))
-                print 'blocks to remove: ', blocks_to_remove
-                # check doesn't need to be performed for zero blocks
-                if len(blocks_to_remove) == 0:
-                    continue
-                # Gets the neighbors attached to the blocks to remove
-                neighbors = self.servant.get_neighbor_blocks(blocks_to_remove[0])
-                for block in blocks_to_remove[1:]:
-                    neighbors.update(self.servant.get_neighbor_blocks(block))
-                # Remove original coordinate
-                neighbors.remove(coordinate)
-                # Now look at each neighbor and their unrevealed
-                for neighbor in neighbors:
-                    neighbor_block_value = self.servant.get_real_block_value(neighbor)
-                    # Skip the neighbor if neighbor has been dealt
-                    if neighbor_block_value == 0:
-                        continue
-                    neighbor_unrevealed = self.get_unrevealed_blocks(neighbor)
-                    # Remove unrevealed from the move
-                    for move in move_set:
-                        if move in neighbor_unrevealed:
-                            neighbor_unrevealed.remove(move)
-                    # If there are fewer blocks than the value, then the move is bad
-                    if len(neighbor_unrevealed) < neighbor_block_value:
-                        valid_move = False
+                valid_move = self.negative_neighbor_move_validation(move_set)
+                # TODO: Incorporate isolated_neighbor_move_validation
                 # Adds valid moves to the list
                 if valid_move:
                     valid_moves.append(move_set)
             try:
                 chosen_placement = choice(valid_moves)
+                print 'chosen move: ', chosen_placement
             except IndexError:
                 print 'no moves!'
             else:
-                for chosen in chosen_placement:
-                    self.flags.append(chosen)
+                # Remove blocks first
                 for index in unrevealed:
                     self.unrevealed.remove(index)
+                # Then flag and remove blocks around neighbors
+                for chosen in chosen_placement:
+                    self.flags.append(chosen)
+                    self.remove_neighbor_unrevealed(chosen)
                 self.servant.custom_pretty_print_field(self.exposed_field,
                                                        unrevealed=self.unrevealed,
                                                        flags=self.flags)
         self.servant.custom_pretty_print_field(self.exposed_field, unrevealed=self.unrevealed,
                                                flags=self.flags)
 
-    def validate_move(self, coordinate_set):
+    def negative_neighbor_move_validation(self, coordinate_set):
         """
-        Checks if a move is valid by looking at the neighbor block values surrounding it.
+        Validates move by looking if neighbor values go negative
         :param coordinate_set:
         :return:
         """
         valid_move = True
         shared_neighbors = self.servant.get_neighbor_blocks(coordinate_set[0])
-        # Get all neighbors that border these blocks
+        # Get all neighbors that border the move set
         for coordinate in coordinate_set[1:]:
             new_neighbors = self.servant.get_neighbor_blocks(coordinate)
             shared_neighbors.intersection_update(new_neighbors)
@@ -101,6 +79,59 @@ class MineSemiSolver:
                 valid_move = False
                 break
         return valid_move
+
+    # TODO: Take account of blocks to remove from surrounding neighbors and if those blocks isolate
+    def isolated_neighbor_move_validation(self, coordinate, move_set, blocks_to_remove):
+        """
+        Validates moves by checking that another coordinate does not become isolated with no mines.
+        :param coordinate:
+        :param move_set:
+        :param blocks_to_remove:
+        :return:
+        """
+        # Have to look at it from the perspective of the blocks to remove
+        print 'blocks to remove: ', blocks_to_remove
+        print 'move set: ', move_set
+        # Check doesn't need to be performed for zero blocks
+        if len(blocks_to_remove) > 0:
+            # Gets the neighbors attached to the blocks to remove
+            neighbors = self.servant.get_neighbor_blocks(blocks_to_remove[0])
+            for block in blocks_to_remove[1:]:
+                neighbors.update(self.servant.get_neighbor_blocks(block))
+                print 'growing neighbors: ', neighbors
+            # Remove original coordinate
+            neighbors.remove(coordinate)
+            # Now look at each neighbor and their unrevealed
+            for neighbor in neighbors:
+                neighbor_block_value = self.servant.get_real_block_value(neighbor)
+                # Skip the neighbor if neighbor has been dealt
+                if neighbor_block_value == 0:
+                    continue
+                neighbor_unrevealed = self.get_unrevealed_blocks(neighbor)
+                # Remove unrevealed from the move
+                for block in blocks_to_remove:
+                    if block in neighbor_unrevealed:
+                        neighbor_unrevealed.remove(block)
+                # If there are fewer blocks than the value, then the move is bad
+                if len(neighbor_unrevealed) < neighbor_block_value:
+                    valid_move = False
+        return valid_move
+
+    def remove_neighbor_unrevealed(self, flag_coordinate):
+        """
+        Removes all blocks around all neighbors with zero value.
+        :param flag_coordinate:
+        :return:
+        """
+        neighbors = self.servant.get_neighbor_blocks(flag_coordinate)
+        # Loop through all neighbors
+        for neighbor in neighbors:
+            block_value = self.servant.get_real_block_value(neighbor)
+            # Remove all blocks if zero
+            if block_value == 0:
+                blocks_to_reveal = self.get_unrevealed_blocks(neighbor)
+                for block in blocks_to_reveal:
+                    self.unrevealed.remove(block)
 
     def get_unrevealed_blocks(self, coordinate):
         """

@@ -4,9 +4,22 @@ Loops through moves
 Find all neighbors next to area
 If num_blocks > block value, invalid
 
+b
+ 1
+ 1
+x1
+x
+
+How to reveal blocks:
+Plant flag
+Remove unrevealed attached to original coordinate
+Look at neighbors around that flag
+Block value == 0?
+Remove all unrevealed around it
+
 Look at each move
-Look at each neighbor
-If the unrevealed that will be removed removes all possible moves from neighbor, then invalid
+Look at all blocks to reveal, including from neighbors
+Look at neighbors touching those blocks
 
 *****GENERAL FLOW*****
 Perform the flag/reveal process repeatedly
