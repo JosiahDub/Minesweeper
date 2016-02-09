@@ -18,7 +18,20 @@ Block value == 0?
 Remove all unrevealed around it
 
 Look at each move
-Look at all blocks to reveal, including from neighbors
+Look at each flag
+Look at neighbors that touch that flag
+If the block value == 0
+Look at the unrevealed of that neighbor
+Look at the neighbors of the unrevealed
+Remove those unrevealed from the new neighbors unrevealed
+Layers:
+1 Flag
+2 Neighbors touching flags. Equal zero? Continue
+3 Unrevealed touching layer 2
+4 Neighbors touching layer 3
+5 Unrevealed touching layer 4
+
+
 Look at neighbors touching those blocks
 
 *****GENERAL FLOW*****
