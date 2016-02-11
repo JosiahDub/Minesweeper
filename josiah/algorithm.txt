@@ -4,11 +4,17 @@ Loops through moves
 Find all neighbors next to area
 If num_blocks > block value, invalid
 
-b
- 1
- 1
-x1
-x
+   1
+0 -1 -1
+2 -1 -1 1
+   1
+Layer 0: coordinate. 2
+Layer 1: potential move set. First column of -1
+Layer 2: Neighbors touching move set. 1's sandwiching layer 1
+Layer 3: What layer 2 reveals. Second row of -1
+Layer 4: Neighbors touching unrevealed of layer 3. Far-right 1
+Layer 5: Unrevealed leftovers of layer 4. Nothing in this case
+This move is invalid.
 
 How to reveal blocks:
 Plant flag

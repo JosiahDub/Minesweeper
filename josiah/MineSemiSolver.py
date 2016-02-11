@@ -83,7 +83,6 @@ class MineSemiSolver:
                 break
         return valid_move
 
-    # TODO: Take account of blocks to remove from surrounding neighbors and if those blocks isolate
     def isolated_neighbor_move_validation(self, coordinate, move_set, blocks_to_remove):
         """
         Validates moves by checking that another coordinate does not become isolated with no mines.
@@ -93,8 +92,9 @@ class MineSemiSolver:
         :return:
         """
         # Have to look at it from the perspective of the blocks to remove
-        print 'blocks to remove: ', blocks_to_remove
-        print 'move set: ', move_set
+        # print 'blocks to remove: ', blocks_to_remove
+        # print 'move set: ', move_set
+        # Innocent until proven guilty
         valid_move = True
         # Check doesn't need to be performed for zero blocks
         if len(blocks_to_remove) > 0:
@@ -105,12 +105,12 @@ class MineSemiSolver:
             # Remove original coordinate
             neighbors.remove(coordinate)
             # Look at each neighbor and their unrevealed
-            for neighbor in neighbors:
-                neighbor_block_value = self.servant.get_real_block_value(neighbor)
+            for neighbor_2 in neighbors:
+                neighbor_block_value = self.servant.get_real_block_value(neighbor_2)
                 # Skip the neighbor if neighbor has been dealt
                 if neighbor_block_value == 0:
                     continue
-                neighbor_unrevealed = self.get_unrevealed_blocks(neighbor)
+                neighbor_unrevealed = self.get_unrevealed_blocks(neighbor_2)
                 # Remove unrevealed from the move
                 for block in blocks_to_remove:
                     if block in neighbor_unrevealed:
@@ -118,36 +118,44 @@ class MineSemiSolver:
                 # If there are fewer blocks than the value, then the move is bad
                 if len(neighbor_unrevealed) < neighbor_block_value:
                     valid_move = False
-            # Look at neighbors of planted flags
+            # Layer 1: potential move set
+            # Layer 2: Neighbors touching potential move set
             neighbors_layer_2 = set([])
+            # Gets all the neighbor blocks which we will need to slightly whittle down
             for flag_coord in move_set:
-                # This gets all the neighbor blocks which we will need to slightly whittle down
                 neighbors_layer_2.update(self.servant.get_neighbor_blocks(flag_coord))
-            # Layer 2
-            for neighbor in neighbors_layer_2:
-                neighbor_surrounding = self.get_surrounding_block_coords(neighbor)
-                num_neighbor_flags = len(neighbor_surrounding.intersection(move_set))
+            for neighbor_2 in neighbors_layer_2:
+                neighbor_2_surrounding = self.get_surrounding_block_coords(neighbor_2)
+                num_neighbor_2_flags = len(neighbor_2_surrounding.intersection(move_set))
                 # The block value if the move were performed
-                layer_2_block_value = self.servant.get_real_block_value(neighbor) - num_neighbor_flags
+                layer_2_block_value = self.servant.get_real_block_value(neighbor_2) - num_neighbor_2_flags
                 if layer_2_block_value == 0:
                     # These will be revealed.
-                    # Layer 3
-                    unrevealed_layer_3 = self.servant.get_unrevealed_blocks(neighbor)
+                    # Layer 3: Unrevealed of layer 2
+                    unrevealed_layer_3 = self.servant.get_unrevealed_blocks(neighbor_2)
                     # Look at blocks neighboring these unrevealed
-                    # Layer 4
+                    # Layer 4: Neighbors of layer 3
                     neighbors_layer_4 = set([])
                     for unrevealed in unrevealed_layer_3:
                         neighbors_layer_4.update(self.servant.get_neighbor_blocks(unrevealed))
+                        # Remove the original block
+                        neighbors_layer_4.remove(neighbor_2)
                     # Remove these unrevealed from the neighbors unrevealed
-                    for unrevealed_neighbor in neighbors_layer_4:
-                        # Layer 5
-                        unrevealed_layer_5 = self.get_unrevealed_blocks(unrevealed_neighbor)
+                    for neighbor_4 in neighbors_layer_4:
+                        neighbor_4_surrounding = self.get_surrounding_block_coords(neighbor_4)
+                        num_neighbor_4_flags = len(neighbor_4_surrounding.intersection(move_set))
+                        # The block value if the move were performed
+                        layer_4_block_val = self.servant.get_real_block_value(neighbor_4) - num_neighbor_4_flags
+                        # Don't need to worry about completed blocks
+                        if layer_4_block_val == 0:
+                            continue
+                        # Layer 5: Unrevealed of layer 4
+                        unrevealed_layer_5 = self.get_unrevealed_blocks(neighbor_4)
                         for unrevealed in unrevealed_layer_3:
                             if unrevealed in unrevealed_layer_5:
                                 unrevealed_layer_5.remove(unrevealed)
-                        # Should I take into account the flags not yet planted?
-                        layer_4_block_val = self.servant.get_real_block_value(unrevealed_neighbor)
                         if len(unrevealed_layer_5) < layer_4_block_val:
+                            print 'invalid move'
                             valid_move = False
         return valid_move
 
