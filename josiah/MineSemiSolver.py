@@ -2,6 +2,7 @@ __author__ = 'josiah'
 from MineServant import MineServant
 from itertools import combinations
 from random import choice
+# TODO: Sort by largest value to smallest
 
 
 class MineSemiSolver:
@@ -62,23 +63,26 @@ class MineSemiSolver:
         self.servant.custom_pretty_print_field(self.exposed_field, unrevealed=self.unrevealed,
                                                flags=self.flags)
 
-    def negative_neighbor_move_validation(self, coordinate_set):
+    def negative_neighbor_move_validation(self, move_set):
         """
         Validates move by looking if neighbor values go negative
-        :param coordinate_set:
+        :param move_set:
         :return:
         """
         valid_move = True
-        shared_neighbors = self.servant.get_neighbor_blocks(coordinate_set[0])
+        shared_neighbors = set([])
         # Get all neighbors that border the move set
-        for coordinate in coordinate_set[1:]:
-            new_neighbors = self.servant.get_neighbor_blocks(coordinate)
-            shared_neighbors.intersection_update(new_neighbors)
+        for coordinate in move_set:
+            shared_neighbors.update(self.servant.get_neighbor_blocks(coordinate))
         # Loop through and check if any are too low.
         for neighbor in shared_neighbors:
-            block_value = self.servant.get_real_block_value(neighbor)
+            # Get number of flags that touch that neighbor
+            neighbor_surrounding = self.get_surrounding_block_coords(neighbor)
+            num_flags = len(neighbor_surrounding.intersection(move_set))
+            # Block value if that move were performed
+            block_value = self.servant.get_real_block_value(neighbor) - num_flags
             # Any neighbor can invalidate the move
-            if block_value < len(coordinate_set):
+            if block_value < 0:
                 valid_move = False
                 break
         return valid_move
